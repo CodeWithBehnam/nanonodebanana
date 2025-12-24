@@ -1,0 +1,52 @@
+{
+  "name": "nanonodebanana",
+  "version": "0.1.0",
+  "description": "Visual node-based workflow editor for AI image generation",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "bun --watch server/index.ts",
+    "build": "tsc && vite build",
+    "build:server": "bun build server/index.ts --outdir=dist/server --target=bun",
+    "start": "bun run dist/server/index.js",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "litegraph.js": "^0.7.18",
+    "elysia": "^1.1.26",
+    "@elysiajs/cors": "^1.1.1",
+    "@elysiajs/static": "^1.1.1",
+    "@google/generative-ai": "^0.21.0",
+    "@fal-ai/client": "^1.2.1",
+    "better-sqlite3": "^11.7.0",
+    "zod": "^3.24.1",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/node": "^22.10.2",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "eslint": "^9.16.0",
+    "@eslint/js": "^9.16.0",
+    "typescript-eslint": "^8.18.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.13.0",
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

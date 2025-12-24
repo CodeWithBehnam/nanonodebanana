@@ -1,0 +1,141 @@
+/**
+ * Custom dark theme for Litegraph.js
+ * Provides a modern, cohesive look that matches the application's design system.
+ */
+
+:root {
+  /* Litegraph theme variables */
+  --lg-background: #18181b;
+  --lg-node-bg: #27272a;
+  --lg-node-border: #3f3f46;
+  --lg-connection: #a1a1aa;
+  --lg-connection-hover: #f4f4f5;
+  --lg-text: #fafafa;
+  --lg-text-muted: #a1a1aa;
+  --lg-selection: #3b82f6;
+
+  /* Node category colours */
+  --lg-input-color: #2563eb;
+  --lg-processing-color: #0891b2;
+  --lg-generation-color: #7c3aed;
+  --lg-output-color: #059669;
+}
+
+/* Canvas background */
+.litegraph.litecanvas {
+  background-color: var(--lg-background) !important;
+}
+
+/* Node styling */
+.litegraph .litegraph-node {
+  background-color: var(--lg-node-bg);
+  border: 1px solid var(--lg-node-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Node title bar */
+.litegraph .litegraph-node .title {
+  border-radius: 8px 8px 0 0;
+  font-weight: 500;
+}
+
+/* Node selection */
+.litegraph .litegraph-node.selected {
+  box-shadow: 0 0 0 2px var(--lg-selection);
+}
+
+/* Connection styling */
+.litegraph .link_color {
+  stroke: var(--lg-connection);
+  stroke-width: 2;
+}
+
+/* Slot labels */
+.litegraph .litegraph-node .slot {
+  color: var(--lg-text);
+  font-size: 12px;
+}
+
+/* Widget styling */
+.litegraph .litegraph-widget {
+  background-color: #3f3f46;
+  border: 1px solid #52525b;
+  border-radius: 4px;
+  color: var(--lg-text);
+}
+
+.litegraph .litegraph-widget:focus {
+  border-color: var(--lg-selection);
+  outline: none;
+}
+
+/* Context menu styling */
+.litegraph .litemenu-entry {
+  background-color: var(--lg-node-bg);
+  color: var(--lg-text);
+  padding: 6px 12px;
+}
+
+.litegraph .litemenu-entry:hover {
+  background-color: #3f3f46;
+}
+
+.litegraph .litemenu {
+  background-color: var(--lg-node-bg);
+  border: 1px solid var(--lg-node-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+  overflow: hidden;
+}
+
+/* Search box */
+.litegraph .lite-search-box {
+  background-color: var(--lg-node-bg);
+  border: 1px solid var(--lg-node-border);
+  border-radius: 8px;
+  color: var(--lg-text);
+}
+
+.litegraph .lite-search-box input {
+  background-color: #3f3f46;
+  border: 1px solid #52525b;
+  border-radius: 4px;
+  color: var(--lg-text);
+}
+
+/* Panel styling */
+.litegraph-panel {
+  background-color: var(--lg-node-bg);
+  border: 1px solid var(--lg-node-border);
+  border-radius: 8px;
+}
+
+/* Minimap */
+.litegraph .litegraph-minimap {
+  background-color: var(--lg-node-bg);
+  border: 1px solid var(--lg-node-border);
+  border-radius: 8px;
+}
+
+/* Dialog styling */
+.litegraph .litegraph-dialog {
+  background-color: var(--lg-node-bg);
+  border: 1px solid var(--lg-node-border);
+  border-radius: 8px;
+  color: var(--lg-text);
+}
+
+/* Progress indicator */
+.litegraph .node-progress {
+  background-color: #3f3f46;
+  border-radius: 4px;
+  height: 4px;
+  overflow: hidden;
+}
+
+.litegraph .node-progress-bar {
+  background-color: var(--lg-selection);
+  height: 100%;
+  transition: width 0.3s ease;
+}
