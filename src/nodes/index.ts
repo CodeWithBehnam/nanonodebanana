@@ -58,7 +58,8 @@ export function registerAllNodes(): void {
   // Dynamically import Litegraph to avoid SSR issues
   import('litegraph.js').then(({ LiteGraph }) => {
     for (const [path, NodeClass] of Object.entries(NODE_PATHS)) {
-      LiteGraph.registerNodeType(path, NodeClass as unknown as typeof LiteGraph.LGraphNode)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      LiteGraph.registerNodeType(path, NodeClass as any)
     }
 
     console.log(`Registered ${Object.keys(NODE_PATHS).length} custom nodes`)

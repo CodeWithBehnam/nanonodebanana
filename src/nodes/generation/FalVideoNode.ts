@@ -56,20 +56,21 @@ export const FalVideoNode = createNodeClass(
   },
   async (node: ExecutableNode) => {
     const prompt = getInputValue<string>(node, 'prompt')
-    const _reference = getInputValue<string>(node, 'reference')
-    const _seed = getInputValue<number>(node, 'seed')
+    // These inputs will be used when video generation is implemented
+    const reference = getInputValue<string>(node, 'reference')
+    const seed = getInputValue<number>(node, 'seed')
 
-    const _model = getWidgetValue<string>(node, 'model') ?? 'veo-3'
-    const _duration = getWidgetValue<string>(node, 'duration') ?? '4s'
-    const _aspectRatio = getWidgetValue<string>(node, 'aspect_ratio') ?? '16:9'
+    const model = getWidgetValue<string>(node, 'model') ?? 'veo-3'
+    const duration = getWidgetValue<string>(node, 'duration') ?? '4s'
+    const aspectRatio = getWidgetValue<string>(node, 'aspect_ratio') ?? '16:9'
 
     if (!prompt) {
       throw new Error('Prompt is required')
     }
 
     // TODO: Implement video generation API call
-    // For now, return a placeholder
-    console.warn('Video generation not yet implemented')
+    // For now, log the parameters and return a placeholder
+    console.warn('Video generation not yet implemented', { model, duration, aspectRatio, seed, reference })
 
     const videoUrl = '' // Placeholder
 

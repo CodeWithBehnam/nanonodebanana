@@ -228,6 +228,7 @@ export function createNodeClass(
       const staticPreviewHeight = config.previewHeight ?? 150
       const dynamicHeightWidget = config.dynamicPreviewHeight
       const imageProperty = config.imageProperty ?? 'url'
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const nodeRef = this
 
       // Store original size calculation

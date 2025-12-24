@@ -7,7 +7,7 @@ import { useExecution } from '../hooks/useExecution'
  */
 export function OutputPreview() {
   const { isExecuting, progress, executionResults } = useExecution()
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedImage] = useState<string | null>(null)
 
   // Get the latest generated image from execution results
   const latestImage = Array.from(executionResults.values())

@@ -31,16 +31,19 @@ export function useClipboard({ graph, canvas, liteGraph, onNodeCreated }: Clipbo
 
       // Check for images first
       for (const item of items) {
-        if (item.type.startsWith('image/')) {
+        // Handle both DataTransferItem (from paste event) and ClipboardItem (from Clipboard API)
+        const itemType = 'type' in item ? (item as DataTransferItem).type : (item as ClipboardItem).types[0]
+        if (itemType?.startsWith('image/')) {
           e?.preventDefault()
-          await handleImagePaste(item as ClipboardItem)
+          await handleImagePaste(item as unknown as ClipboardItem)
           return
         }
       }
 
       // Check for text (could be JSON workflow or prompt)
       for (const item of items) {
-        if (item.type === 'text/plain') {
+        const itemType = 'type' in item ? (item as DataTransferItem).type : (item as ClipboardItem).types[0]
+        if (itemType === 'text/plain') {
           const text = e?.clipboardData
             ? e.clipboardData.getData('text/plain')
             : await (item as ClipboardItem).getType('text/plain').then(blob => blob.text())
@@ -77,7 +80,10 @@ export function useClipboard({ graph, canvas, liteGraph, onNodeCreated }: Clipbo
   async function handleImagePaste(item: ClipboardItem) {
     if (!graph || !canvas || !liteGraph) return
 
-    const blob = await item.getType(item.types[0])
+    const imageType = item.types[0]
+    if (!imageType) return
+
+    const blob = await item.getType(imageType)
     const file = new File([blob], 'pasted-image.png', { type: blob.type })
 
     // Get center of viewport for node placement
@@ -213,6 +219,7 @@ export function useClipboard({ graph, canvas, liteGraph, onNodeCreated }: Clipbo
     if (selectedNodes.length === 1) {
       // Single node - copy as JSON
       const node = selectedNodes[0]
+      if (!node) return
       const serialized = node.serialize()
       await navigator.clipboard.writeText(JSON.stringify(serialized, null, 2))
     } else {

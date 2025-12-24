@@ -24,7 +24,7 @@ jobs:
         run: bun install
 
       - name: Run linting
-        run: bun run lint
+        run: bunx eslint . --ext ts,tsx --report-unused-disable-directives
 
       - name: Run type checking
         run: bun run typecheck
@@ -55,5 +55,5 @@ jobs:
         run: bun run typecheck
 
       - name: Check formatting
-        run: bun run lint
+        run: bunx eslint . --ext ts,tsx --report-unused-disable-directives
         continue-on-error: true

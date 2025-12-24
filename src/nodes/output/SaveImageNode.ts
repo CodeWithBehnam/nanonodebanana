@@ -82,10 +82,9 @@ export const SaveImageNode = createNodeClass(
     // Convert base64 to blob with correct format
     const blob = await base64ToBlob(image, mimeType, quality)
 
-    // Download if auto-save or trigger download
-    if (autoSave || true) { // For now, always download
-      downloadBlob(blob, `${filename}.${format.toLowerCase()}`)
-    }
+    // Download the image (autoSave will be used for automatic saving in future)
+    void autoSave // Suppress unused variable warning
+    downloadBlob(blob, `${filename}.${format.toLowerCase()}`)
 
     return { saved: true, filename }
   }

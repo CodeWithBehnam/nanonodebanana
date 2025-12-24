@@ -31,6 +31,7 @@ export function PromptNode(this: PromptNodeType) {
   this.resizable = true
 
   // Store reference for callbacks
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const nodeRef = this
 
   // Get textarea bounds

@@ -92,11 +92,14 @@ export const workflowRoutes = new Elysia({ prefix: '/api/workflows' })
 
       const now = new Date().toISOString()
 
+      // existing.graph is already an object (from WorkflowResponse), so stringify it if not overriding
+      const graphString = body.graph ? JSON.stringify(body.graph) : JSON.stringify(existing.graph)
+
       const workflow = {
         id: params.id,
         name: body.name ?? existing.name,
         description: body.description ?? existing.description,
-        graph: body.graph ? JSON.stringify(body.graph) : existing.graph,
+        graph: graphString,
         thumbnail: body.thumbnail ?? existing.thumbnail,
         createdAt: existing.createdAt,
         updatedAt: now,
@@ -106,7 +109,7 @@ export const workflowRoutes = new Elysia({ prefix: '/api/workflows' })
 
       return {
         ...workflow,
-        graph: body.graph ?? JSON.parse(existing.graph),
+        graph: body.graph ?? existing.graph,
       }
     },
     {
