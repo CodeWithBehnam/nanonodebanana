@@ -1,5 +1,31 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useExecution } from '../hooks/useExecution'
+
+/**
+ * Convert raw base64 to data URI if needed.
+ */
+function toDataUri(image: string | null | undefined): string | null {
+  if (!image) return null
+
+  // Already a URL or data URI
+  if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:') || image.startsWith('blob:')) {
+    return image
+  }
+
+  // Raw base64 - detect format and convert to data URI
+  if (image.startsWith('/9j/')) {
+    return `data:image/jpeg;base64,${image}`
+  } else if (image.startsWith('iVBORw')) {
+    return `data:image/png;base64,${image}`
+  } else if (image.startsWith('R0lGOD')) {
+    return `data:image/gif;base64,${image}`
+  } else if (image.startsWith('UklGR')) {
+    return `data:image/webp;base64,${image}`
+  }
+
+  // Default to PNG
+  return `data:image/png;base64,${image}`
+}
 
 /**
  * Bottom right panel displaying generated output images.
@@ -16,7 +42,11 @@ export function OutputPreview() {
     )
     .pop()?.image
 
-  const displayImage = selectedImage || latestImage
+  // Convert to data URI for display (memoized to avoid recalculating)
+  const displayImage = useMemo(
+    () => toDataUri(selectedImage || latestImage),
+    [selectedImage, latestImage]
+  )
 
   return (
     <div className="flex h-64 flex-col p-4">
