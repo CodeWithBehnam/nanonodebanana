@@ -30,6 +30,8 @@ export interface NodeConfig {
   imageProperty?: string
   /** Minimum height for image preview area */
   previewHeight?: number
+  /** Widget name to use for dynamic preview height (overrides previewHeight) */
+  dynamicPreviewHeight?: string
 }
 
 // Image cache to avoid reloading images on every render
@@ -223,7 +225,8 @@ export function createNodeClass(
 
     // Add image preview support
     if (config.showImagePreview) {
-      const previewHeight = config.previewHeight ?? 150
+      const staticPreviewHeight = config.previewHeight ?? 150
+      const dynamicHeightWidget = config.dynamicPreviewHeight
       const imageProperty = config.imageProperty ?? 'url'
       const nodeRef = this
 
@@ -232,6 +235,15 @@ export function createNodeClass(
 
       // Override onDrawForeground to render images
       this.onDrawForeground = function(ctx: CanvasRenderingContext2D) {
+        // Get preview height from widget or use static value
+        let previewHeight = staticPreviewHeight
+        if (dynamicHeightWidget) {
+          const widget = nodeRef.widgets?.find(w => w.name === dynamicHeightWidget)
+          if (widget && typeof widget.value === 'number') {
+            previewHeight = widget.value
+          }
+        }
+
         const url = nodeRef.properties?.[imageProperty] as string
         if (!url) {
           // Draw placeholder
@@ -246,8 +258,9 @@ export function createNodeClass(
 
           // Ensure node height accommodates preview area
           const requiredHeight = baseHeight + previewHeight + 20
-          if (nodeRef.size[1] < requiredHeight) {
+          if (nodeRef.size[1] !== requiredHeight) {
             nodeRef.size[1] = requiredHeight
+            nodeRef.setDirtyCanvas?.(true, true)
           }
           return
         }
@@ -297,10 +310,11 @@ export function createNodeClass(
           ctx.roundRect(drawX, y, drawWidth, drawHeight, radius)
           ctx.stroke()
 
-          // Update node height based on actual image
-          const requiredHeight = y + drawHeight + 10
-          if (nodeRef.size[1] < requiredHeight) {
+          // Update node height based on actual preview height
+          const requiredHeight = baseHeight + previewHeight + 20
+          if (Math.abs(nodeRef.size[1] - requiredHeight) > 5) {
             nodeRef.size[1] = requiredHeight
+            nodeRef.setDirtyCanvas?.(true, true)
           }
         } else {
           // Draw loading indicator
@@ -314,8 +328,9 @@ export function createNodeClass(
 
           // Ensure node height
           const requiredHeight = baseHeight + previewHeight + 20
-          if (nodeRef.size[1] < requiredHeight) {
+          if (nodeRef.size[1] !== requiredHeight) {
             nodeRef.size[1] = requiredHeight
+            nodeRef.setDirtyCanvas?.(true, true)
           }
         }
       }

@@ -2,6 +2,9 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import type { LGraph, LGraphCanvas, LiteGraph as LiteGraphType } from 'litegraph.js'
 import { useGraph } from '../hooks/useGraph'
 import { registerAllNodes } from '../nodes'
+import { loadAutosave, enableAutosave, serialiseGraph } from '../lib/workflow-storage'
+
+const AUTOSAVE_KEY = 'nanonodebanana_autosave'
 
 interface WorkflowCanvasProps {
   onCanvasReady?: (canvas: LGraphCanvas) => void
@@ -68,9 +71,10 @@ export function WorkflowCanvas({ onCanvasReady }: WorkflowCanvasProps) {
         }
       })(LiteGraph.registerNodeType.bind(LiteGraph))
 
-      // Set slot colors for different data types
-      if (LiteGraph.slot_types_default_out) {
-        Object.assign(LiteGraph.slot_types_default_out, {
+      // Set slot colors for different data types (runtime properties)
+      const lg = LiteGraph as unknown as Record<string, Record<string, string>>
+      if (lg.slot_types_default_out) {
+        Object.assign(lg.slot_types_default_out, {
           string: '#9F9',
           number: '#99F',
           image: '#64B5F6',
@@ -78,8 +82,8 @@ export function WorkflowCanvas({ onCanvasReady }: WorkflowCanvasProps) {
         })
       }
 
-      if (LiteGraph.slot_types_default_in) {
-        Object.assign(LiteGraph.slot_types_default_in, {
+      if (lg.slot_types_default_in) {
+        Object.assign(lg.slot_types_default_in, {
           string: '#9F9',
           number: '#99F',
           image: '#64B5F6',
@@ -99,6 +103,17 @@ export function WorkflowCanvas({ onCanvasReady }: WorkflowCanvasProps) {
       const newGraph = new LGraph()
       graphRef.current = newGraph
       setGraph(newGraph)
+
+      // Try to load autosaved workflow
+      const autosaved = loadAutosave()
+      if (autosaved && autosaved.graph) {
+        console.log('Restoring autosaved workflow from:', autosaved.savedAt)
+        try {
+          newGraph.configure(autosaved.graph as Parameters<typeof newGraph.configure>[0])
+        } catch (err) {
+          console.warn('Failed to restore autosave:', err)
+        }
+      }
 
       // Create canvas instance
       const canvas = new LGraphCanvas(canvasRef.current, newGraph)
@@ -146,6 +161,29 @@ export function WorkflowCanvas({ onCanvasReady }: WorkflowCanvasProps) {
       }
       animate()
 
+      // Enable autosave (saves every 30 seconds)
+      const stopAutosave = enableAutosave(newGraph, 'Current Workflow')
+      console.log('Autosave enabled')
+
+      // Also save on every graph change (immediate save)
+      const originalOnChange = newGraph.onNodeAdded
+      newGraph.onNodeAdded = function(node) {
+        originalOnChange?.call(newGraph, node)
+        saveGraphToLocalStorage(newGraph)
+      }
+
+      const originalOnRemove = newGraph.onNodeRemoved
+      newGraph.onNodeRemoved = function(node) {
+        originalOnRemove?.call(newGraph, node)
+        saveGraphToLocalStorage(newGraph)
+      }
+
+      // Listen to connectionChange event for saving
+      newGraph.connectionChange = function(_node) {
+        saveGraphToLocalStorage(newGraph)
+        return true
+      }
+
       // Notify parent that canvas is ready
       onCanvasReady?.(canvas)
       setIsInitialized(true)
@@ -153,10 +191,21 @@ export function WorkflowCanvas({ onCanvasReady }: WorkflowCanvasProps) {
       return () => {
         mounted = false
         resizeObserver.disconnect()
+        stopAutosave()
         if (animationFrame) {
           cancelAnimationFrame(animationFrame)
         }
       }
+    }
+
+    // Helper to save graph immediately to localStorage
+    function saveGraphToLocalStorage(graph: LGraph) {
+      const data = {
+        name: 'Current Workflow',
+        graph: serialiseGraph(graph),
+        savedAt: new Date().toISOString(),
+      }
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data))
     }
 
     initGraph()

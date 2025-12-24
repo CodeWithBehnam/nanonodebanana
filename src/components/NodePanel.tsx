@@ -106,6 +106,12 @@ const NODE_CATEGORIES: NodeCategory[] = [
         colour: NODE_TYPE_COLOURS.nanoBanana,
         description: 'Nano Banana image generation',
       },
+      {
+        type: 'generation/nano-banana-edit',
+        label: 'Nano Banana Edit',
+        colour: NODE_TYPE_COLOURS.nanoBananaEdit,
+        description: 'Edit images with Nano Banana',
+      },
     ],
   },
   {

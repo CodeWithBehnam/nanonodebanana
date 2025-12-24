@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
-import type { LGraph, LGraphCanvas } from 'litegraph.js'
+import { useState, useCallback } from 'react'
+import type { SerializedLGraph } from 'litegraph.js'
 import { useGraph } from './hooks/useGraph'
 import { useExecution } from './hooks/useExecution'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
@@ -21,7 +21,7 @@ import type { WorkflowData } from './types/nodes'
  * Follows a three-panel design: node library (left), canvas (centre), properties/preview (right).
  */
 function AppContent() {
-  const { graph, setGraph, selectedNode, canvas, setCanvas } = useGraph()
+  const { graph, selectedNode, canvas, setCanvas } = useGraph()
   const { isExecuting, execute, cancel } = useExecution()
 
   // Dialog state
@@ -62,7 +62,7 @@ function AppContent() {
     if (!graph) return
 
     const serialized = graph.serialize()
-    await workflowApi.save({
+    await workflowApi.create({
       name,
       description,
       graph: serialized,
@@ -73,7 +73,7 @@ function AppContent() {
   const handleLoad = useCallback((workflow: WorkflowData) => {
     if (!graph) return
 
-    graph.configure(workflow.graph)
+    graph.configure(workflow.graph as SerializedLGraph)
     canvas?.setDirty(true, true)
   }, [graph, canvas])
 

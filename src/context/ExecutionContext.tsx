@@ -7,6 +7,8 @@ import {
   type ReactNode,
 } from 'react'
 import type { ExecutionContext as NodeExecutionContext } from '../types/nodes'
+import { useGraphContext } from './GraphContext'
+import { createExecutionEngine } from '../lib/graph-executor'
 
 /**
  * Execution state interface for managing workflow execution.
@@ -33,6 +35,8 @@ interface ExecutionProviderProps {
  * Handles workflow execution, cancellation, and progress tracking.
  */
 export function ExecutionProvider({ children }: ExecutionProviderProps) {
+  const { graph, canvas } = useGraphContext()
+
   const [isExecuting, setIsExecuting] = useState(false)
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null)
   const [executionResults] = useState<Map<string, unknown>>(new Map())
@@ -40,42 +44,70 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
   const [progress, setProgress] = useState(0)
   const [nodeStatuses, setNodeStatuses] = useState<Map<string, NodeExecutionContext>>(new Map())
 
-  const cancelRef = useRef(false)
+  const engineRef = useRef(createExecutionEngine())
 
   const execute = useCallback(async () => {
-    cancelRef.current = false
+    if (!graph) {
+      console.error('No graph available for execution')
+      return
+    }
+
+    if (graph._nodes.length === 0) {
+      console.log('No nodes to execute')
+      return
+    }
+
     setIsExecuting(true)
     setProgress(0)
     executionResults.clear()
     executionErrors.clear()
     setNodeStatuses(new Map())
 
-    try {
-      // TODO: Implement actual execution engine integration
-      // This will be replaced with the graph executor
-      console.log('Executing workflow...')
+    console.log('Starting workflow execution...')
 
-      // Simulate execution progress
-      for (let i = 0; i <= 100; i += 10) {
-        if (cancelRef.current) {
-          console.log('Execution cancelled')
-          break
+    try {
+      const engine = engineRef.current
+
+      // Execute the graph and process each node's status
+      for await (const status of engine.execute(graph)) {
+        setCurrentNodeId(status.nodeId)
+        setProgress(status.progress ?? 0)
+
+        // Update node statuses
+        setNodeStatuses(prev => {
+          const next = new Map(prev)
+          next.set(status.nodeId, status)
+          return next
+        })
+
+        // Store results or errors
+        if (status.status === 'completed' && status.result) {
+          executionResults.set(status.nodeId, status.result)
+          console.log(`Node ${status.nodeId} completed:`, status.result)
+        } else if (status.status === 'error' && status.error) {
+          executionErrors.set(status.nodeId, status.error)
+          console.error(`Node ${status.nodeId} error:`, status.error)
         }
-        setProgress(i)
-        await new Promise(resolve => setTimeout(resolve, 100))
+
+        // Force canvas redraw to show updated node states
+        canvas?.setDirty(true, true)
       }
+
+      console.log('Workflow execution completed')
+      setProgress(100)
     } catch (error) {
       console.error('Execution failed:', error)
     } finally {
       setIsExecuting(false)
       setCurrentNodeId(null)
     }
-  }, [executionResults, executionErrors])
+  }, [graph, canvas, executionResults, executionErrors])
 
   const cancel = useCallback(() => {
-    cancelRef.current = true
+    engineRef.current.cancel()
     setIsExecuting(false)
     setCurrentNodeId(null)
+    console.log('Execution cancelled')
   }, [])
 
   const getNodeStatus = useCallback(

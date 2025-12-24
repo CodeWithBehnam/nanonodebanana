@@ -16,6 +16,7 @@ import { GeminiGeneratorNode } from './generation/GeminiGeneratorNode'
 import { FalFluxNode } from './generation/FalFluxNode'
 import { FalVideoNode } from './generation/FalVideoNode'
 import { NanoBananaNode } from './generation/NanoBananaNode'
+import { NanoBananaEditNode } from './generation/NanoBananaEditNode'
 import { ImageOutputNode } from './output/ImageOutputNode'
 import { SaveImageNode } from './output/SaveImageNode'
 import { GalleryNode } from './output/GalleryNode'
@@ -41,6 +42,7 @@ const NODE_PATHS = {
   'generation/fal-flux': FalFluxNode,
   'generation/fal-video': FalVideoNode,
   'generation/nano-banana': NanoBananaNode,
+  'generation/nano-banana-edit': NanoBananaEditNode,
 
   // Output nodes
   'output/image': ImageOutputNode,
@@ -91,6 +93,7 @@ export {
   FalFluxNode,
   FalVideoNode,
   NanoBananaNode,
+  NanoBananaEditNode,
   ImageOutputNode,
   SaveImageNode,
   GalleryNode,

@@ -15,13 +15,27 @@ export const ImageOutputNode = createNodeClass(
       { name: 'image', type: 'image' },
     ],
     outputs: [],
+    widgets: [
+      {
+        name: 'preview_size',
+        type: 'slider',
+        defaultValue: 200,
+        options: {
+          min: 100,
+          max: 600,
+          step: 10,
+        },
+      },
+    ],
     properties: {
       imageData: '',
+      preview_size: 200,
     },
     // Enable image preview - shows output result
     showImagePreview: true,
     imageProperty: 'imageData',
-    previewHeight: 200,
+    // Use dynamic preview height from widget
+    dynamicPreviewHeight: 'preview_size',
   },
   async (node: ExecutableNode) => {
     const image = getInputValue<string>(node, 'image')

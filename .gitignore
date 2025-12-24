@@ -46,3 +46,13 @@ bun.lockb
 
 # TypeScript cache
 *.tsbuildinfo
+
+.claude
+
+docs/
+
+
+CLAUDE.MD
+
+# Playwright MCP cache
+.playwright-mcp/

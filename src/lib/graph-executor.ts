@@ -135,7 +135,8 @@ export function createExecutionEngine(): ExecutionEngine {
           }
 
           // Execute and get output
-          nodeOutput = (await (node as { onExecute: () => Promise<Record<string, unknown>> }).onExecute()) || {}
+          const executeResult = await (node as unknown as { onExecute: () => Promise<Record<string, unknown>> }).onExecute()
+          nodeOutput = executeResult || {}
         }
 
         // Store results

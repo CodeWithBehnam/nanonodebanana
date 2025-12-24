@@ -16,7 +16,7 @@ export function serialiseGraph(graph: LGraph): object {
  * Deserialises a graph from saved data.
  */
 export function deserialiseGraph(graph: LGraph, data: object): void {
-  graph.configure(data)
+  graph.configure(data as Parameters<typeof graph.configure>[0])
 }
 
 /**
