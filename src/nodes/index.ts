@@ -17,6 +17,8 @@ import { FalFluxNode } from './generation/FalFluxNode'
 import { FalVideoNode } from './generation/FalVideoNode'
 import { NanoBananaNode } from './generation/NanoBananaNode'
 import { NanoBananaEditNode } from './generation/NanoBananaEditNode'
+import { NanoBananaProNode } from './generation/NanoBananaProNode'
+import { NanoBananaProEditNode } from './generation/NanoBananaProEditNode'
 import { ImageOutputNode } from './output/ImageOutputNode'
 import { SaveImageNode } from './output/SaveImageNode'
 import { GalleryNode } from './output/GalleryNode'
@@ -43,6 +45,8 @@ const NODE_PATHS = {
   'generation/fal-video': FalVideoNode,
   'generation/nano-banana': NanoBananaNode,
   'generation/nano-banana-edit': NanoBananaEditNode,
+  'generation/nano-banana-pro': NanoBananaProNode,
+  'generation/nano-banana-pro-edit': NanoBananaProEditNode,
 
   // Output nodes
   'output/image': ImageOutputNode,
@@ -95,6 +99,8 @@ export {
   FalVideoNode,
   NanoBananaNode,
   NanoBananaEditNode,
+  NanoBananaProNode,
+  NanoBananaProEditNode,
   ImageOutputNode,
   SaveImageNode,
   GalleryNode,

@@ -3,11 +3,9 @@ import { NODE_TYPE_COLOURS } from '../../types/nodes'
 import { generateApi } from '../../lib/api-client'
 
 /**
- * Aspect ratio presets for Nano Banana Edit.
- * Includes 'auto' which preserves the input image's aspect ratio.
+ * Aspect ratio presets for Nano Banana Pro.
  */
 const ASPECT_RATIOS = [
-  'auto',    // Preserve input aspect ratio
   '1:1',     // Square
   '16:9',    // Landscape wide
   '9:16',    // Portrait tall
@@ -21,23 +19,27 @@ const ASPECT_RATIOS = [
 ] as const
 
 /**
+ * Resolution options for Nano Banana Pro.
+ */
+const RESOLUTIONS = ['1K', '2K', '4K'] as const
+
+/**
  * Output format options.
  */
 const OUTPUT_FORMATS = ['png', 'jpeg', 'webp'] as const
 
 /**
- * NanoBananaEditNode - Nano Banana image editing node.
- * Edits images using Fal.ai's Nano Banana Edit model.
- * Takes an input image and a prompt to modify the image.
+ * NanoBananaProNode - Nano Banana Pro image generation node.
+ * Generates images using Fal.ai's Nano Banana Pro model with enhanced
+ * resolution control, web search integration, and better realism/typography.
  */
-export const NanoBananaEditNode = createNodeClass(
+export const NanoBananaProNode = createNodeClass(
   {
-    title: 'Nano Banana Edit',
+    title: 'Nano Banana Pro',
     category: 'generation',
-    colour: NODE_TYPE_COLOURS.nanoBananaEdit,
-    description: 'Edit images with Nano Banana',
+    colour: NODE_TYPE_COLOURS.nanoBananaPro,
+    description: 'Pro model with resolution control & web search',
     inputs: [
-      { name: 'image', type: 'image' },
       { name: 'prompt', type: 'string' },
     ],
     outputs: [
@@ -46,9 +48,17 @@ export const NanoBananaEditNode = createNodeClass(
     ],
     widgets: [
       {
+        name: 'resolution',
+        type: 'combo',
+        defaultValue: '1K',
+        options: {
+          values: [...RESOLUTIONS],
+        },
+      },
+      {
         name: 'aspect_ratio',
         type: 'combo',
-        defaultValue: 'auto',
+        defaultValue: '1:1',
         options: {
           values: [...ASPECT_RATIOS],
         },
@@ -69,11 +79,24 @@ export const NanoBananaEditNode = createNodeClass(
           values: [...OUTPUT_FORMATS],
         },
       },
+      {
+        name: 'enable_web_search',
+        type: 'toggle',
+        defaultValue: false,
+      },
+      {
+        name: 'limit_generations',
+        type: 'toggle',
+        defaultValue: false,
+      },
     ],
     properties: {
-      aspect_ratio: 'auto',
+      resolution: '1K',
+      aspect_ratio: '1:1',
       num_images: '1',
       output_format: 'png',
+      enable_web_search: false,
+      limit_generations: false,
       executionTime: 0,
       description: '',
     },
@@ -81,16 +104,14 @@ export const NanoBananaEditNode = createNodeClass(
     showProgressIndicator: true,
   },
   async (node: ExecutableNode) => {
-    const image = getInputValue<string>(node, 'image')
     const prompt = getInputValue<string>(node, 'prompt')
 
-    const aspectRatio = getWidgetValue<string>(node, 'aspect_ratio') ?? 'auto'
+    const resolution = getWidgetValue<string>(node, 'resolution') ?? '1K'
+    const aspectRatio = getWidgetValue<string>(node, 'aspect_ratio') ?? '1:1'
     const numImagesStr = getWidgetValue<string>(node, 'num_images') ?? '1'
     const outputFormat = getWidgetValue<string>(node, 'output_format') ?? 'png'
-
-    if (!image) {
-      throw new Error('Input image is required')
-    }
+    const enableWebSearch = getWidgetValue<boolean>(node, 'enable_web_search') ?? false
+    const limitGenerations = getWidgetValue<boolean>(node, 'limit_generations') ?? false
 
     if (!prompt) {
       throw new Error('Prompt is required')
@@ -99,12 +120,14 @@ export const NanoBananaEditNode = createNodeClass(
     const numImages = parseInt(numImagesStr, 10)
 
     // Call API
-    const response = await generateApi.nanoBananaEdit({
+    const response = await generateApi.nanoBananaPro({
       prompt,
-      imageUrl: image,
       numImages,
-      aspectRatio: aspectRatio as 'auto' | '21:9' | '16:9' | '3:2' | '4:3' | '5:4' | '1:1' | '4:5' | '3:4' | '2:3' | '9:16',
+      resolution: resolution as '1K' | '2K' | '4K',
+      aspectRatio: aspectRatio as '21:9' | '16:9' | '3:2' | '4:3' | '5:4' | '1:1' | '4:5' | '3:4' | '2:3' | '9:16',
       outputFormat: outputFormat as 'jpeg' | 'png' | 'webp',
+      enableWebSearch,
+      limitGenerations,
     })
 
     // Store execution info
@@ -112,12 +135,12 @@ export const NanoBananaEditNode = createNodeClass(
     node.setProperty('description', response.description ?? '')
 
     // Get first image
-    const outputImage = response.images[0] ?? ''
+    const image = response.images[0] ?? ''
 
     // Set outputs
-    node.setOutputData(0, outputImage)
+    node.setOutputData(0, image)
     node.setOutputData(1, response.description ?? '')
 
-    return { image: outputImage, description: response.description }
+    return { image, description: response.description }
   }
 )
