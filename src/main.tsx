@@ -1,3 +1,8 @@
+import { suppressPassiveEventWarnings } from './lib/passive-events'
+
+// Suppress LiteGraph passive event warnings (must run before library loads)
+suppressPassiveEventWarnings()
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
