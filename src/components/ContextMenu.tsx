@@ -162,6 +162,7 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
 /**
  * Hook for managing context menu state.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useContextMenu() {
   const [menu, setMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null)
 
@@ -179,6 +180,7 @@ export function useContextMenu() {
 /**
  * Common context menu items for nodes.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getNodeContextMenuItems(options: {
   onCopy?: () => void
   onCut?: () => void
@@ -264,6 +266,7 @@ export function getNodeContextMenuItems(options: {
 /**
  * Common context menu items for canvas.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getCanvasContextMenuItems(options: {
   onPaste?: () => void
   onSelectAll?: () => void

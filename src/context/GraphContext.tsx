@@ -54,6 +54,7 @@ export function GraphProvider({ children }: GraphProviderProps) {
  * Hook to access graph state from any component.
  * Must be used within a GraphProvider.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useGraphContext(): GraphState {
   const context = useContext(GraphContext)
 

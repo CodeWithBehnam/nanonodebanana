@@ -245,6 +245,7 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
  * Hook to access execution state from any component.
  * Must be used within an ExecutionProvider.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useExecutionContext(): ExecutionState {
   const context = useContext(ExecutionContext)
 
