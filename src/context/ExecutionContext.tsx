@@ -48,6 +48,13 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
 
   const engineRef = useRef(createExecutionEngine())
 
+  // Use ref for execution state to avoid stale closures in rapid calls
+  const isExecutingRef = useRef(false)
+
+  // Debounce cooldown period (ms) to prevent rapid re-execution
+  const DEBOUNCE_COOLDOWN_MS = 300
+  const lastExecutionTimeRef = useRef(0)
+
   const execute = useCallback(async () => {
     if (!graph) {
       console.error('No graph available for execution')
@@ -59,6 +66,20 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
       return
     }
 
+    // Debounce: prevent execution if already running
+    if (isExecutingRef.current) {
+      console.log('Execution already in progress, ignoring request')
+      return
+    }
+
+    // Debounce: prevent rapid re-execution after completion
+    const now = Date.now()
+    if (now - lastExecutionTimeRef.current < DEBOUNCE_COOLDOWN_MS) {
+      console.log('Execution cooldown active, ignoring request')
+      return
+    }
+
+    isExecutingRef.current = true
     setIsExecuting(true)
     setProgress(0)
     executionResults.clear()
@@ -100,6 +121,8 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
     } catch (error) {
       console.error('Execution failed:', error)
     } finally {
+      isExecutingRef.current = false
+      lastExecutionTimeRef.current = Date.now()
       setIsExecuting(false)
       setCurrentNodeId(null)
     }
@@ -115,6 +138,20 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
       return
     }
 
+    // Debounce: prevent execution if already running
+    if (isExecutingRef.current) {
+      console.log('Execution already in progress, ignoring request')
+      return
+    }
+
+    // Debounce: prevent rapid re-execution after completion
+    const now = Date.now()
+    if (now - lastExecutionTimeRef.current < DEBOUNCE_COOLDOWN_MS) {
+      console.log('Execution cooldown active, ignoring request')
+      return
+    }
+
+    isExecutingRef.current = true
     setIsExecuting(true)
     setProgress(0)
     // Don't clear previous results - we'll use them for upstream nodes
@@ -152,6 +189,8 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
     } catch (error) {
       console.error('Execution failed:', error)
     } finally {
+      isExecutingRef.current = false
+      lastExecutionTimeRef.current = Date.now()
       setIsExecuting(false)
       setCurrentNodeId(null)
     }
@@ -166,6 +205,20 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
       return
     }
 
+    // Debounce: prevent execution if already running
+    if (isExecutingRef.current) {
+      console.log('Execution already in progress, ignoring request')
+      return
+    }
+
+    // Debounce: prevent rapid re-execution after completion
+    const now = Date.now()
+    if (now - lastExecutionTimeRef.current < DEBOUNCE_COOLDOWN_MS) {
+      console.log('Execution cooldown active, ignoring request')
+      return
+    }
+
+    isExecutingRef.current = true
     setIsExecuting(true)
     setProgress(0)
     setNodeStatuses(new Map())
@@ -202,6 +255,8 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
     } catch (error) {
       console.error('Execution failed:', error)
     } finally {
+      isExecutingRef.current = false
+      lastExecutionTimeRef.current = Date.now()
       setIsExecuting(false)
       setCurrentNodeId(null)
     }
@@ -209,6 +264,8 @@ export function ExecutionProvider({ children }: ExecutionProviderProps) {
 
   const cancel = useCallback(() => {
     engineRef.current.cancel()
+    isExecutingRef.current = false
+    lastExecutionTimeRef.current = Date.now()
     setIsExecuting(false)
     setCurrentNodeId(null)
     console.log('Execution cancelled')
