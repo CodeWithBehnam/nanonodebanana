@@ -409,6 +409,97 @@ export const workflowTemplates: WorkflowTemplate[] = [
       version: 0.4,
     },
   },
+  {
+    id: 'contact-sheet-prompting',
+    name: 'Contact Sheet Prompting',
+    description: 'Generate 2×3 contact sheet with 6 camera angles using Nano Banana Pro Edit',
+    category: 'advanced',
+    graph: {
+      last_node_id: 4,
+      last_link_id: 3,
+      nodes: [
+        {
+          id: 1,
+          type: 'input/image',
+          pos: [100, 150],
+          size: [280, 250],
+          flags: {},
+          order: 0,
+          mode: 0,
+          outputs: [{ name: 'image', type: 'image', links: [1] }],
+          properties: {
+            url: '',
+            base64: '',
+            fileName: '',
+          },
+        },
+        {
+          id: 2,
+          type: 'input/prompt',
+          pos: [100, 450],
+          size: [350, 300],
+          flags: {},
+          order: 1,
+          mode: 0,
+          outputs: [{ name: 'prompt', type: 'string', links: [2] }],
+          properties: {
+            text: `Create a 2×3 contact sheet image, 3 columns and 2 rows. Each cell represents a different camera shot, arranged as if from a film production sheet. Use same actress consistently in all frames. Total 6 frames with these exact shots:
+
+1. Wide shot – full body in environment, 24mm lens feel
+2. Medium shot – waist-up framing, 50mm lens feel
+3. Close-up – shoulders and face, 85mm lens feel
+4. High angle – looking down at subject, 35mm lens feel
+5. Low angle – looking up at subject, dramatic, 24mm lens feel
+6. Detail/insert shot – focus on hands, accessory, or prop, 100mm macro lens feel
+
+Rules:
+• Maintain consistent lighting across all frames
+• Each frame should have a thin white border between them
+• Use same actress consistently across all frames
+• Consistent outfit/styling/hair across frames
+• Subtle film grain to unify the contact sheet aesthetic
+• Minimal background variation for continuity
+• Consistent color grading: slightly desaturated, lifted blacks`,
+          },
+        },
+        {
+          id: 3,
+          type: 'generation/nano-banana-pro-edit',
+          pos: [500, 250],
+          size: [200, 180],
+          flags: {},
+          order: 2,
+          mode: 0,
+          inputs: [
+            { name: 'image', type: 'image', link: 1 },
+            { name: 'prompt', type: 'string', link: 2 },
+          ],
+          outputs: [{ name: 'image', type: 'image', links: [3] }],
+          properties: {},
+        },
+        {
+          id: 4,
+          type: 'output/image',
+          pos: [750, 250],
+          size: [300, 300],
+          flags: {},
+          order: 3,
+          mode: 0,
+          inputs: [{ name: 'image', type: 'image', link: 3 }],
+          properties: {},
+        },
+      ],
+      links: [
+        [1, 1, 0, 3, 0, 'image'],
+        [2, 2, 0, 3, 1, 'string'],
+        [3, 3, 0, 4, 0, 'image'],
+      ],
+      groups: [],
+      config: {},
+      extra: {},
+      version: 0.4,
+    },
+  },
 ]
 
 /**
