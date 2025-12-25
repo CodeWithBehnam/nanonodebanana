@@ -139,15 +139,41 @@ export function clearLocalStorage(): void {
 }
 
 /**
+ * Simple hash function for change detection.
+ * Uses djb2 algorithm - fast and sufficient for detecting changes.
+ */
+function hashString(str: string): number {
+  let hash = 5381
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i)
+  }
+  return hash >>> 0 // Convert to unsigned 32-bit integer
+}
+
+/**
  * Enables autosave for the graph.
- * Saves to local storage on every change, stripping large image data to prevent quota errors.
+ * Only saves when the graph has actually changed, stripping large image data to prevent quota errors.
  */
 export function enableAutosave(graph: LGraph, name: string): () => void {
+  // Track last saved state to avoid redundant saves
+  let lastSavedHash = 0
+
   const intervalId = setInterval(() => {
     const graphData = serialiseGraph(graph)
 
     // Always strip large data for autosave to prevent quota issues
     const strippedGraph = stripLargeDataFromGraph(graphData)
+
+    // Create stable JSON without timestamp for change detection
+    const stableJson = JSON.stringify({ name, graph: strippedGraph })
+    const currentHash = hashString(stableJson)
+
+    // Skip if nothing has changed
+    if (currentHash === lastSavedHash) {
+      return
+    }
+
+    // Add timestamp only for the actual save
     const data = {
       name,
       graph: strippedGraph,
@@ -168,6 +194,9 @@ export function enableAutosave(graph: LGraph, name: string): () => void {
       localStorage.removeItem(AUTOSAVE_KEY)
       safeSetLocalStorage(AUTOSAVE_KEY, jsonData)
     }
+
+    // Update hash only on successful save
+    lastSavedHash = currentHash
   }, 30000) // Autosave every 30 seconds
 
   return () => clearInterval(intervalId)
