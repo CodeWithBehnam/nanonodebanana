@@ -9,6 +9,14 @@ interface MinimapProps {
 }
 
 /**
+ * Get the current device pixel ratio, capped for performance.
+ */
+function getDevicePixelRatio(): number {
+  const dpr = window.devicePixelRatio || 1
+  return Math.min(dpr, 2)
+}
+
+/**
  * Minimap component that shows a bird's-eye view of the graph.
  * Allows click-to-navigate and displays the current viewport.
  */
@@ -47,10 +55,21 @@ export function Minimap({ graph, canvas, width = 192, height = 128 }: MinimapPro
     }
   }, [graph])
 
-  // Draw the minimap
+  // Draw the minimap with DPR scaling for sharp rendering
   const drawMinimap = useCallback(() => {
-    const ctx = minimapRef.current?.getContext('2d')
-    if (!ctx || !graph || !canvas) return
+    const minimapCanvas = minimapRef.current
+    const ctx = minimapCanvas?.getContext('2d')
+    if (!ctx || !graph || !canvas || !minimapCanvas) return
+
+    const dpr = getDevicePixelRatio()
+
+    // Set canvas backing store to physical pixels
+    if (minimapCanvas.width !== width * dpr || minimapCanvas.height !== height * dpr) {
+      minimapCanvas.width = width * dpr
+      minimapCanvas.height = height * dpr
+      minimapCanvas.style.width = `${width}px`
+      minimapCanvas.style.height = `${height}px`
+    }
 
     const bounds = getGraphBounds()
     const graphWidth = bounds.maxX - bounds.minX
@@ -64,6 +83,10 @@ export function Minimap({ graph, canvas, width = 192, height = 128 }: MinimapPro
     // Center offset
     const offsetX = (width - graphWidth * scale) / 2
     const offsetY = (height - graphHeight * scale) / 2
+
+    // Apply DPR scaling for sharp rendering
+    ctx.save()
+    ctx.scale(dpr, dpr)
 
     // Clear canvas
     ctx.fillStyle = '#1a1a1a'
@@ -165,6 +188,9 @@ export function Minimap({ graph, canvas, width = 192, height = 128 }: MinimapPro
       offsetX,
       offsetY,
     }
+
+    // Restore context after DPR scaling
+    ctx.restore()
   }, [graph, canvas, width, height, getGraphBounds])
 
   // Handle click to navigate
@@ -237,9 +263,8 @@ export function Minimap({ graph, canvas, width = 192, height = 128 }: MinimapPro
   return (
     <canvas
       ref={minimapRef}
-      width={width}
-      height={height}
       className="rounded-lg cursor-crosshair"
+      style={{ width, height }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

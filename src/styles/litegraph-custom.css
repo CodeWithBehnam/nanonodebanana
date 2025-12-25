@@ -35,6 +35,17 @@
   background-color: var(--lg-background) !important;
 }
 
+/* High-DPI canvas rendering hints for crisp display */
+canvas {
+  /* Optimise for crisp edges on high-DPI displays */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* Prevent subpixel rendering artifacts */
+  -webkit-font-smoothing: antialiased;
+  /* Ensure touch actions work properly */
+  touch-action: none;
+}
+
 /* Node styling - ComfyUI style */
 .litegraph .litegraph-node {
   background-color: var(--lg-node-bgcolor);
