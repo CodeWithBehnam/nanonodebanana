@@ -331,6 +331,7 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 /**
  * Hook to access settings from anywhere in the app.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSettings(): Settings {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
 

@@ -122,6 +122,7 @@ export function ImageHistoryProvider({ children }: ImageHistoryProviderProps) {
  * Hook to access image history state from any component.
  * Must be used within an ImageHistoryProvider.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useImageHistory(): ImageHistoryState {
   const context = useContext(ImageHistoryContext)
 

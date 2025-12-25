@@ -15,69 +15,16 @@ interface ClipboardOptions {
 export function useClipboard({ graph, canvas, liteGraph, onNodeCreated }: ClipboardOptions) {
   const isHandling = useRef(false)
 
-  /**
-   * Handle paste from clipboard.
-   * Supports images, text, and workflow JSON.
-   */
-  const handlePaste = useCallback(async (e?: ClipboardEvent) => {
-    if (!graph || !canvas || !liteGraph || isHandling.current) return
-
-    isHandling.current = true
-
-    try {
-      // Get clipboard items
-      const items = e?.clipboardData?.items || await getClipboardItems()
-      if (!items) return
-
-      // Check for images first
-      for (const item of items) {
-        // Handle both DataTransferItem (from paste event) and ClipboardItem (from Clipboard API)
-        const itemType = 'type' in item ? (item as DataTransferItem).type : (item as ClipboardItem).types[0]
-        if (itemType?.startsWith('image/')) {
-          e?.preventDefault()
-          await handleImagePaste(item as unknown as ClipboardItem)
-          return
-        }
-      }
-
-      // Check for text (could be JSON workflow or prompt)
-      for (const item of items) {
-        const itemType = 'type' in item ? (item as DataTransferItem).type : (item as ClipboardItem).types[0]
-        if (itemType === 'text/plain') {
-          const text = e?.clipboardData
-            ? e.clipboardData.getData('text/plain')
-            : await (item as ClipboardItem).getType('text/plain').then(blob => blob.text())
-
-          if (text) {
-            e?.preventDefault()
-            await handleTextPaste(text)
-            return
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Paste error:', error)
-    } finally {
-      isHandling.current = false
-    }
-  }, [graph, canvas, liteGraph])
-
-  /**
-   * Get clipboard items using Clipboard API.
-   */
-  async function getClipboardItems(): Promise<ClipboardItems | null> {
-    try {
-      return await navigator.clipboard.read()
-    } catch {
-      return null
-    }
-  }
+  // Store refs to latest props to avoid stale closures
+  const propsRef = useRef({ graph, canvas, liteGraph, onNodeCreated })
+  propsRef.current = { graph, canvas, liteGraph, onNodeCreated }
 
   /**
    * Handle pasting an image from clipboard.
    * Creates an ImageSource node and uploads the image.
    */
-  async function handleImagePaste(item: ClipboardItem) {
+  const handleImagePaste = useCallback(async (item: ClipboardItem) => {
+    const { graph, canvas, liteGraph, onNodeCreated } = propsRef.current
     if (!graph || !canvas || !liteGraph) return
 
     const imageType = item.types[0]
@@ -119,13 +66,14 @@ export function useClipboard({ graph, canvas, liteGraph, onNodeCreated }: Clipbo
     canvas.setDirty(true, true)
     canvas.selectNode(node)
     onNodeCreated?.(node.id)
-  }
+  }, [])
 
   /**
    * Handle pasting text from clipboard.
    * Could be a workflow JSON, URL, or prompt text.
    */
-  async function handleTextPaste(text: string) {
+  const handleTextPaste = useCallback(async (text: string) => {
+    const { graph, canvas, liteGraph, onNodeCreated } = propsRef.current
     if (!graph || !canvas || !liteGraph) return
 
     const trimmed = text.trim()
@@ -191,6 +139,65 @@ export function useClipboard({ graph, canvas, liteGraph, onNodeCreated }: Clipbo
       canvas.setDirty(true, true)
       canvas.selectNode(node)
       onNodeCreated?.(node.id)
+    }
+  }, [])
+
+  /**
+   * Handle paste from clipboard.
+   * Supports images, text, and workflow JSON.
+   */
+  const handlePaste = useCallback(async (e?: ClipboardEvent) => {
+    const { graph, canvas, liteGraph } = propsRef.current
+    if (!graph || !canvas || !liteGraph || isHandling.current) return
+
+    isHandling.current = true
+
+    try {
+      // Get clipboard items
+      const items = e?.clipboardData?.items || await getClipboardItems()
+      if (!items) return
+
+      // Check for images first
+      for (const item of items) {
+        // Handle both DataTransferItem (from paste event) and ClipboardItem (from Clipboard API)
+        const itemType = 'type' in item ? (item as DataTransferItem).type : (item as ClipboardItem).types[0]
+        if (itemType?.startsWith('image/')) {
+          e?.preventDefault()
+          await handleImagePaste(item as unknown as ClipboardItem)
+          return
+        }
+      }
+
+      // Check for text (could be JSON workflow or prompt)
+      for (const item of items) {
+        const itemType = 'type' in item ? (item as DataTransferItem).type : (item as ClipboardItem).types[0]
+        if (itemType === 'text/plain') {
+          const text = e?.clipboardData
+            ? e.clipboardData.getData('text/plain')
+            : await (item as ClipboardItem).getType('text/plain').then(blob => blob.text())
+
+          if (text) {
+            e?.preventDefault()
+            await handleTextPaste(text)
+            return
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Paste error:', error)
+    } finally {
+      isHandling.current = false
+    }
+  }, [handleImagePaste, handleTextPaste])
+
+  /**
+   * Get clipboard items using Clipboard API.
+   */
+  async function getClipboardItems(): Promise<ClipboardItems | null> {
+    try {
+      return await navigator.clipboard.read()
+    } catch {
+      return null
     }
   }
 

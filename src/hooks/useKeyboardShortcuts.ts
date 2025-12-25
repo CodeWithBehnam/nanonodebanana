@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useMemo } from 'react'
 import type { LGraph, LGraphCanvas } from 'litegraph.js'
 import { NODE_MODE } from '../nodes/base/BaseNode'
 
@@ -83,8 +83,8 @@ export function useKeyboardShortcuts(options: KeyboardShortcutsOptions) {
     onRedo?.()
   }, [graph, canvas, onRedo])
 
-  // Define shortcuts
-  const shortcuts: ShortcutAction[] = [
+  // Define shortcuts - memoized to prevent useEffect re-registration
+  const shortcuts: ShortcutAction[] = useMemo(() => [
     {
       key: 's',
       ctrl: true,
@@ -244,7 +244,7 @@ export function useKeyboardShortcuts(options: KeyboardShortcutsOptions) {
       action: () => onTemplates?.(),
       description: 'Prompt templates',
     },
-  ]
+  ], [canvas, graph, handleRedo, handleUndo, onLoad, onNew, onSave, onTemplates])
 
   // Handle keydown events
   useEffect(() => {

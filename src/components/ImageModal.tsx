@@ -154,6 +154,7 @@ export function ImageModal() {
 /**
  * Helper function to show the image modal from anywhere.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function showImageModal(url: string, title?: string, metadata?: Record<string, unknown>) {
   const event = new CustomEvent<ImageModalData>('show-image-modal', {
     detail: { url, title, metadata },
