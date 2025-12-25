@@ -89,7 +89,7 @@ async function blendImages(
 
       // Use dimensions of first image
       canvas.width = imgA.width
-      canvas.height = imgB.height
+      canvas.height = imgA.height
 
       // Draw first image
       ctx.drawImage(imgA, 0, 0)

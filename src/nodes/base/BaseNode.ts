@@ -62,8 +62,58 @@ export interface NodeConfig {
   showProgressIndicator?: boolean
 }
 
-// Image cache to avoid reloading images on every render
-const imageCache = new Map<string, HTMLImageElement>()
+/**
+ * LRU (Least Recently Used) cache for images.
+ * Prevents memory leaks by evicting old entries when the cache is full.
+ */
+class LRUImageCache {
+  private cache = new Map<string, HTMLImageElement>()
+  private readonly maxSize: number
+
+  constructor(maxSize = 50) {
+    this.maxSize = maxSize
+  }
+
+  get(key: string): HTMLImageElement | undefined {
+    const value = this.cache.get(key)
+    if (value !== undefined) {
+      // Move to end (most recently used) by re-inserting
+      this.cache.delete(key)
+      this.cache.set(key, value)
+    }
+    return value
+  }
+
+  set(key: string, value: HTMLImageElement): void {
+    // Delete if exists to update position
+    if (this.cache.has(key)) {
+      this.cache.delete(key)
+    }
+    // Evict oldest entries if at capacity
+    while (this.cache.size >= this.maxSize) {
+      const oldestKey = this.cache.keys().next().value
+      if (oldestKey) {
+        this.cache.delete(oldestKey)
+      }
+    }
+    this.cache.set(key, value)
+  }
+
+  has(key: string): boolean {
+    return this.cache.has(key)
+  }
+
+  get size(): number {
+    return this.cache.size
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+}
+
+// Image cache with LRU eviction (max 50 images)
+const imageCache = new LRUImageCache(50)
 const loadingImages = new Set<string>()
 
 /**
